@@ -94,15 +94,11 @@ class WinnowSender(SenderBase):
         self.net_exposed_bits = 0
         self.syndrome_length = 3
         self.removed_bits: List[int] = []
-
-        self.syndrome_array: List[int] = [
-            0 for _ in range(int(np.floor(self.message.length / 8)))
-        ]
-
+        self.syndrome_array: List[int] = [0] * (self.message.length // 8)
+            
         # Stores the indices of blocks which contain errors
-        self.bad_blocks_array: List[int] = [
-            0 for _ in range(int(np.floor(self.message.length / 8)))
-        ]
+        self.bad_blocks_array: List[int] = [0] * (self.message.length // 8)
+            
         self.parity_string: List[List[int]] = [[]] * self.number_of_passes
 
         self.parity_check_matrix = np.zeros([10, 1023], dtype=int)
@@ -276,7 +272,7 @@ class WinnowSender(SenderBase):
     def first_pass(self) -> None:
         """First pass with initializations and parity determination."""
         # Note that the incomplete last block is not included in each pass
-        self.number_of_blocks = int(np.floor(self.message.length / self.block_size))
+        self.number_of_blocks = self.message.length // self.block_size
         self.parity_string = [0] * self.number_of_blocks
 
         self.create_parity_check_matrix()
@@ -292,7 +288,8 @@ class WinnowSender(SenderBase):
         self.block_size = 1 << self.syndrome_length
 
         # Note that the incomplete last block is not included in each pass
-        self.number_of_blocks = int(np.floor(self.message.length / self.block_size))
+        self.number_of_blocks = self.message.length // self.block_size
+        
         self.create_parity_check_matrix()
         self.permute_buffer()
         self.build_parity_string()
